@@ -1,0 +1,32 @@
+#!/bin/sh -ex
+echo "do nothing - core requires no post-package configuration commands"
+echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee /etc/apt/sources.list.d/webupd8team-java.list
+echo "deb-src http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" | tee -a /etc/apt/sources.list.d/webupd8team-java.list
+apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys EEA14886
+apt-get update
+echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+apt-get --assume-yes install oracle-java8-installer
+echo "JAVA_HOME=/usr/lib/jvm/java-8-oracle" | tee -a /etc/environment
+export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+
+
+SRC=/usr/local/src
+unzip $SRC/apache-servicemix*.zip -d $SRC
+rm $SRC/apache-servicemix*.zip
+mv $SRC/apache-servicemix* /opt/
+SERVICEMIX_HOME=$(readlink -f /opt/apache-servicemix*)
+
+
+sed -i -- 's/0.0.0.0/127.0.0.1/g' $SERVICEMIX_HOME/etc/org.apache.karaf.management.cfg
+
+$SERVICEMIX_HOME/bin/start
+#sleep 30
+$SERVICEMIX_HOME/bin/client -r 20 -d 2 "feature:install wrapper"
+$SERVICEMIX_HOME/bin/client -r 20 -d 2 "feature:install webconsole"
+$SERVICEMIX_HOME/bin/client "wrapper:install"
+$SERVICEMIX_HOME/bin/stop
+sed -i '2i\\n### BEGIN INIT INFO\n# Provides:          karaf\n# Required-Start:    $all\n# Required-Stop:     $all\n# Default-Start:     2 3 4 5\n# Default-Stop:      0 1 6\n# Short-Description: starts the karaf server\n# Description:       starts karaf using...\n### END INIT INFO\n' $SERVICEMIX_HOME/bin/karaf-service
+
+ln -s /opt/apache-servicemix-7.0.0/bin/karaf-service /etc/init.d/
+update-rc.d karaf-service defaults
+
