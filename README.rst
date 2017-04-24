@@ -10,7 +10,7 @@ by OSGi.
 This appliance includes all the standard features in `TurnKey Core`_,
 and on top of that:
 
-- Oracle JDK 8
+- Oracle JDK 8:
    - Oracle JDK 8 installed 
 
 - ServiceMix configurations:
@@ -18,7 +18,7 @@ and on top of that:
    - Installed from upstream release to /opt/apache-servicemix-7.0.0/
    - Configured to startup/shutdown via SystemD
                
-- Useful and popular features installed
+- Useful and popular features installed:
    
    - ServiceWrapper: Allows SystemD/SysV integration
    - WebConsole: Installed to allow web access via port 8181
